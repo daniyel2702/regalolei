@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Para Ti ❤️</title>
+    <style>
+        body { margin: 0; background: #000; overflow: hidden; font-family: 'Segoe UI', sans-serif; touch-action: manipulation; }
+        #bgCanvas { position: absolute; top: 0; left: 0; z-index: 1; }
+        #treeCanvas { position: absolute; top: 0; left: 0; z-index: 2; }
+        
+        #ui-layer {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            display: flex; flex-direction: column; align-items: center;
+            justify-content: center; pointer-events: none; z-index: 10;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px; border-radius: 25px; text-align: center;
+            box-shadow: 0 0 50px rgba(255, 77, 109, 0.7);
+            pointer-events: auto; width: 280px; 
+            border: 1px solid rgba(255, 77, 109, 0.3);
+            opacity: 0; transition: opacity 0.6s ease-in, transform 0.5s ease;
+            position: relative;
+            /* Resplandor animado */
+            animation: glowing 3s infinite alternate;
+        }
+        @keyframes glowing {
+            from { box-shadow: 0 0 30px rgba(255, 77, 109, 0.5); }
+            to { box-shadow: 0 0 60px rgba(255, 206, 0, 0.4); }
+        }
+
+        .card.visible { opacity: 1; }
+        .card.open { transform: scale(1.05); border: 2px solid #ffce00; }
+
+        #btn-oprimeme { 
+            padding: 12px 40px; border-radius: 50px; border: none;
+            background: #ff4d6d; color: white; font-weight: bold; 
+            cursor: pointer; font-size: 1.1rem; transition: 0.3s;
+            box-shadow: 0 4px 15px rgba(255, 77, 109, 0.3);
+        }
+
+        #carta-contenido { display: none; }
+        /* Texto estilo máquina de escribir */
+        #texto-animado { 
+            color: #333; font-size: 1.1rem; line-height: 1.6; 
+            font-style: italic; margin-bottom: 15px; min-height: 80px;
+        }
+
+        .hidden { display: none !important; }
+
+        .btn-cerrar {
+            padding: 8px 20px; background: #ff4d6d; color: white;
+            border: none; border-radius: 50px; cursor: pointer; font-weight: bold;
+            opacity: 0; animation: fadeIn 1s forwards; animation-delay: 3s;
+        }
+        @keyframes fadeIn { to { opacity: 1; } }
+    </style>
+</head>
+<body>
+
+<audio id="musica" loop preload="auto">
+    <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3" type="audio/mpeg">
+</audio>
+
+<canvas id="bgCanvas"></canvas>
+<canvas id="treeCanvas"></canvas>
+
+<div id="ui-layer">
+    <div class="card" id="mainCard">
+        <div id="proposal-btns">
+            <button id="btn-oprimeme" onclick="abrirCarta()">Oprímeme ✨</button>
+        </div>
+        <div id="carta-contenido">
+            <div id="texto-animado"></div>
+            <button class="btn-cerrar" onclick="cerrarCarta()">Cerrar ❤️</button>
+        </div>
+    </div>
+</div>
+
+<script>
+const treeCanvas = document.getElementById('treeCanvas');
+const treeCtx = treeCanvas.getContext('2d');
+const bgCanvas = document.getElementById('bgCanvas');
+const bgCtx = bgCanvas.getContext('2d');
+const card = document.getElementById('mainCard');
+const musica = document.getElementById('musica');
+
+treeCanvas.width = bgCanvas.width = window.innerWidth;
+treeCanvas.height = bgCanvas.height = window.innerHeight;
+
+const mensajeCompleto = "Desde que nos conocimos te eh tomado mucho carino,  hice este pequeno detallito para ti tqm corazon de melon ! 🌻🌻🌻❤️✨";
+
+function abrirCarta() {
+    musica.play().catch(e => console.log("Audio ready"));
+    document.getElementById('proposal-btns').classList.add('hidden');
+    document.getElementById('carta-contenido').style.display = 'block';
+    card.classList.add('open');
+    
+    // Iniciar efecto máquina de escribir
+    let i = 0;
+    const contenedor = document.getElementById('texto-animado');
+    contenedor.innerHTML = "";
+    function escribir() {
+        if (i < mensajeCompleto.length) {
+            contenedor.innerHTML += mensajeCompleto.charAt(i);
+            i++;
+            setTimeout(escribir, 50); // Velocidad de escritura
+        }
+    }
+    escribir();
+}
+
+function cerrarCarta() {
+    document.getElementById('carta-contenido').style.display = 'none';
+    document.getElementById('proposal-btns').classList.remove('hidden');
+    card.classList.remove('open');
+}
+
+let branches = []; 
+function drawHarmoniousTree(depth) {
+    if (depth <= 0) {
+        setTimeout(() => card.classList.add('visible'), 300);
+        return;
+    }
+    let nextBranches = [];
+    branches.forEach(b => {
+        const len = depth * (Math.random() * 2 + 7.5);
+        const x2 = b.x + (Math.cos(b.angle * Math.PI / 180) * len);
+        const y2 = b.y + (Math.sin(b.angle * Math.PI / 180) * len);
+        treeCtx.beginPath();
+        treeCtx.strokeStyle = depth < 4 ? '#ff758f' : '#4d2a15';
+        treeCtx.lineWidth = b.width;
+        treeCtx.lineCap = 'round';
+        treeCtx.moveTo(b.x, b.y);
+        treeCtx.lineTo(x2, y2);
+        treeCtx.stroke();
+        
+        // Añadir chispas mágicas doradas aleatorias cerca de las ramas
+        if(Math.random() > 0.5) {
+            treeCtx.fillStyle = "#ffce00";
+            treeCtx.beginPath();
+            treeCtx.arc(x2 + (Math.random()*20-10), y2 + (Math.random()*20-10), 1, 0, Math.PI*2);
+            treeCtx.fill();
+        }
+
+        if (depth === 1) drawHeart(treeCtx, x2, y2, 10, '#ff4d6d');
+        nextBranches.push({ x: x2, y: y2, angle: b.angle - 35, width: b.width * 0.7 });
+        nextBranches.push({ x: x2, y: y2, angle: b.angle + 35, width: b.width * 0.7 });
+    });
+    branches = nextBranches;
+    setTimeout(() => drawHarmoniousTree(depth - 1), 100);
+}
+
+function drawHeart(ctx, x, y, size, color) {
+    ctx.beginPath(); ctx.fillStyle = color; ctx.moveTo(x, y);
+    ctx.bezierCurveTo(x, y - size/1.5, x - size, y - size/1.5, x - size, y);
+    ctx.bezierCurveTo(x - size, y + size/1.5, x, y + size, x, y + size * 1.5);
+    ctx.bezierCurveTo(x, y + size, x + size, y + size/1.5, x + size, y);
+    ctx.bezierCurveTo(x + size, y - size/1.5, x, y - size/1.5, x, y); ctx.fill();
+}
+
+function drawSunflower(x, y, size) {
+    const talloLen = size * 6.5;
+    treeCtx.beginPath(); treeCtx.strokeStyle = "#1a3300"; treeCtx.lineWidth = size / 2.5;
+    treeCtx.moveTo(x, y); treeCtx.quadraticCurveTo(x + (Math.random()*20-10), y - talloLen/2, x, y - talloLen);
+    treeCtx.stroke(); treeCtx.save(); treeCtx.translate(x, y - talloLen);
+    for (let i = 0; i < 18; i++) {
+        treeCtx.rotate((Math.PI * 2) / 18); treeCtx.beginPath(); treeCtx.fillStyle = i % 2 === 0 ? "#ffce00" : "#ffb700";
+        treeCtx.ellipse(size * 1.6, 0, size * 1.4, size / 1.6, 0, 0, Math.PI * 2); treeCtx.fill();
+    }
+    treeCtx.beginPath(); treeCtx.fillStyle = "#2b1608"; treeCtx.arc(0, 0, size * 1.1, 0, Math.PI * 2); treeCtx.fill(); treeCtx.restore();
+}
+
+let heartBg = [];
+function animateBg() {
+    bgCtx.clearRect(0, 0, bgCanvas.width, bgCanvas.height);
+    heartBg.forEach(h => {
+        bgCtx.globalAlpha = h.opacity;
+        drawHeart(bgCtx, h.x, h.y, h.size, '#ff4d6d');
+        h.y -= h.speed;
+        if (h.y < -20) h.y = bgCanvas.height + 20;
+    });
+    requestAnimationFrame(animateBg);
+}
+
+for(let i=0; i<1500; i++) { 
+    heartBg.push({ x: Math.random() * bgCanvas.width, y: Math.random() * bgCanvas.height, size: Math.random() * 3 + 0.5, opacity: Math.random() * 0.4 + 0.05, speed: Math.random() * 0.4 + 0.1 }); 
+}
+animateBg();
+
+for(let i = 0; i < 300; i++) { 
+    setTimeout(() => drawSunflower(Math.random() * treeCanvas.width, treeCanvas.height * 0.99, Math.random() * 4 + 4), i * 3); 
+}
+
+setTimeout(() => {
+    branches = [{ x: treeCanvas.width / 2, y: treeCanvas.height * 0.65, angle: -90, width: 14 }];
+    drawHarmoniousTree(11);
+}, 200);
+</script>
+</body>
+</html>
