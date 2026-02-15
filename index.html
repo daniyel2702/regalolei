@@ -17,35 +17,33 @@
 
         .card {
             background: rgba(255, 255, 255, 0.95);
-            padding: 30px; border-radius: 25px; text-align: center;
+            padding: 25px; border-radius: 25px; text-align: center;
             box-shadow: 0 0 50px rgba(255, 77, 109, 0.7);
-            pointer-events: auto; width: 280px; 
+            pointer-events: auto; width: 260px; /* Un poco más estrecha para iPhone 11 */
             border: 1px solid rgba(255, 77, 109, 0.3);
             opacity: 0; transition: opacity 0.6s ease-in, transform 0.5s ease;
             position: relative;
-            /* Resplandor animado */
             animation: glowing 3s infinite alternate;
         }
+
         @keyframes glowing {
             from { box-shadow: 0 0 30px rgba(255, 77, 109, 0.5); }
             to { box-shadow: 0 0 60px rgba(255, 206, 0, 0.4); }
         }
 
         .card.visible { opacity: 1; }
-        .card.open { transform: scale(1.05); border: 2px solid #ffce00; }
+        .card.open { transform: scale(1.02); border: 2px solid #ffce00; }
 
         #btn-oprimeme { 
-            padding: 12px 40px; border-radius: 50px; border: none;
+            padding: 12px 35px; border-radius: 50px; border: none;
             background: #ff4d6d; color: white; font-weight: bold; 
             cursor: pointer; font-size: 1.1rem; transition: 0.3s;
-            box-shadow: 0 4px 15px rgba(255, 77, 109, 0.3);
         }
 
         #carta-contenido { display: none; }
-        /* Texto estilo máquina de escribir */
-        #texto-animado { 
-            color: #333; font-size: 1.1rem; line-height: 1.6; 
-            font-style: italic; margin-bottom: 15px; min-height: 80px;
+        #texto-lindo { 
+            color: #333; font-size: 1rem; line-height: 1.5; 
+            font-style: italic; margin-bottom: 15px; min-height: 60px;
         }
 
         .hidden { display: none !important; }
@@ -53,9 +51,7 @@
         .btn-cerrar {
             padding: 8px 20px; background: #ff4d6d; color: white;
             border: none; border-radius: 50px; cursor: pointer; font-weight: bold;
-            opacity: 0; animation: fadeIn 1s forwards; animation-delay: 3s;
         }
-        @keyframes fadeIn { to { opacity: 1; } }
     </style>
 </head>
 <body>
@@ -73,7 +69,7 @@
             <button id="btn-oprimeme" onclick="abrirCarta()">Oprímeme ✨</button>
         </div>
         <div id="carta-contenido">
-            <div id="texto-animado"></div>
+            <div id="texto-lindo"></div>
             <button class="btn-cerrar" onclick="cerrarCarta()">Cerrar ❤️</button>
         </div>
     </div>
@@ -90,23 +86,22 @@ const musica = document.getElementById('musica');
 treeCanvas.width = bgCanvas.width = window.innerWidth;
 treeCanvas.height = bgCanvas.height = window.innerHeight;
 
-const mensajeCompleto = "Desde que nos conocimos te eh tomado mucho carino,  hice este pequeno detallito para ti tqm corazon de melon ! 🌻🌻🌻❤️✨";
+const mensajeCompleto = "Desde que llegaste, mi mundo es mucho más bonito. ¡Eres lo más especial para mí! ❤️✨ 🌻";
 
 function abrirCarta() {
-    musica.play().catch(e => console.log("Audio ready"));
+    musica.play().catch(e => console.log("Audio activo"));
     document.getElementById('proposal-btns').classList.add('hidden');
     document.getElementById('carta-contenido').style.display = 'block';
     card.classList.add('open');
     
-    // Iniciar efecto máquina de escribir
     let i = 0;
-    const contenedor = document.getElementById('texto-animado');
+    const contenedor = document.getElementById('texto-lindo');
     contenedor.innerHTML = "";
     function escribir() {
         if (i < mensajeCompleto.length) {
             contenedor.innerHTML += mensajeCompleto.charAt(i);
             i++;
-            setTimeout(escribir, 50); // Velocidad de escritura
+            setTimeout(escribir, 40);
         }
     }
     escribir();
@@ -126,9 +121,11 @@ function drawHarmoniousTree(depth) {
     }
     let nextBranches = [];
     branches.forEach(b => {
-        const len = depth * (Math.random() * 2 + 7.5);
+        // Ajuste iPhone 11: Ramas un poco más cortas para evitar que se salgan de lo ancho
+        const len = depth * (Math.random() * 2 + 6.8);
         const x2 = b.x + (Math.cos(b.angle * Math.PI / 180) * len);
         const y2 = b.y + (Math.sin(b.angle * Math.PI / 180) * len);
+        
         treeCtx.beginPath();
         treeCtx.strokeStyle = depth < 4 ? '#ff758f' : '#4d2a15';
         treeCtx.lineWidth = b.width;
@@ -137,17 +134,17 @@ function drawHarmoniousTree(depth) {
         treeCtx.lineTo(x2, y2);
         treeCtx.stroke();
         
-        // Añadir chispas mágicas doradas aleatorias cerca de las ramas
         if(Math.random() > 0.5) {
             treeCtx.fillStyle = "#ffce00";
             treeCtx.beginPath();
-            treeCtx.arc(x2 + (Math.random()*20-10), y2 + (Math.random()*20-10), 1, 0, Math.PI*2);
+            treeCtx.arc(x2 + (Math.random()*15-7.5), y2 + (Math.random()*15-7.5), 1, 0, Math.PI*2);
             treeCtx.fill();
         }
 
-        if (depth === 1) drawHeart(treeCtx, x2, y2, 10, '#ff4d6d');
-        nextBranches.push({ x: x2, y: y2, angle: b.angle - 35, width: b.width * 0.7 });
-        nextBranches.push({ x: x2, y: y2, angle: b.angle + 35, width: b.width * 0.7 });
+        if (depth === 1) drawHeart(treeCtx, x2, y2, 9, '#ff4d6d');
+        
+        nextBranches.push({ x: x2, y: y2, angle: b.angle - 32, width: b.width * 0.7 });
+        nextBranches.push({ x: x2, y: y2, angle: b.angle + 32, width: b.width * 0.7 });
     });
     branches = nextBranches;
     setTimeout(() => drawHarmoniousTree(depth - 1), 100);
@@ -186,16 +183,17 @@ function animateBg() {
 }
 
 for(let i=0; i<1500; i++) { 
-    heartBg.push({ x: Math.random() * bgCanvas.width, y: Math.random() * bgCanvas.height, size: Math.random() * 3 + 0.5, opacity: Math.random() * 0.4 + 0.05, speed: Math.random() * 0.4 + 0.1 }); 
+    heartBg.push({ x: Math.random() * bgCanvas.width, y: Math.random() * bgCanvas.height, size: Math.random() * 2.5 + 0.5, opacity: Math.random() * 0.4 + 0.05, speed: Math.random() * 0.4 + 0.1 }); 
 }
 animateBg();
 
-for(let i = 0; i < 300; i++) { 
-    setTimeout(() => drawSunflower(Math.random() * treeCanvas.width, treeCanvas.height * 0.99, Math.random() * 4 + 4), i * 3); 
+for(let i = 0; i < 250; i++) { 
+    setTimeout(() => drawSunflower(Math.random() * treeCanvas.width, treeCanvas.height * 0.99, Math.random() * 3.5 + 3.5), i * 3); 
 }
 
 setTimeout(() => {
-    branches = [{ x: treeCanvas.width / 2, y: treeCanvas.height * 0.65, angle: -90, width: 14 }];
+    // Inicia en el 60% de altura para dar espacio al crecimiento en pantalla larga de iPhone 11
+    branches = [{ x: treeCanvas.width / 2, y: treeCanvas.height * 0.60, angle: -90, width: 14 }];
     drawHarmoniousTree(11);
 }, 200);
 </script>
